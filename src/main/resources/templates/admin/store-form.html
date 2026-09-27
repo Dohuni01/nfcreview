@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('가게 정보')}"></head>
+<body>
+<header th:replace="~{admin/fragments :: nav}"></header>
+<main class="container narrow">
+  <p><a th:href="@{/admin/stores}">← 가게 목록</a></p>
+  <h1 th:text="${storeId == null} ? '가게 추가' : '가게 정보 수정'">가게 추가</h1>
+
+  <form class="panel" th:object="${form}" method="post"
+        th:action="${storeId == null} ? @{/admin/stores} : @{/admin/stores/{id}/edit(id=${storeId})}">
+
+    <label for="name">가게 이름</label>
+    <input th:field="*{name}" maxlength="100" placeholder="빨간주막">
+    <p class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">에러</p>
+
+    <label for="reviewUrl">네이버 리뷰 주소</label>
+    <input th:field="*{reviewUrl}" placeholder="https://m.place.naver.com/...">
+    <p class="help">손님이 "네이버 리뷰 쓰러 가기"를 누르면 이 주소로 이동해요.</p>
+    <p class="error" th:if="${#fields.hasErrors('reviewUrl')}" th:errors="*{reviewUrl}">에러</p>
+
+    <label for="landingMode">NFC 탭 후 이동</label>
+    <select th:field="*{landingMode}" onchange="onModeChange(this)">
+      <option value="DIRECT">DIRECT — 바로 네이버 리뷰 페이지로</option>
+      <option value="CUSTOM">CUSTOM — 내 정적 홈페이지 먼저</option>
+    </select>
+    <p class="error" th:if="${#fields.hasErrors('landingMode')}" th:errors="*{landingMode}">에러</p>
+
+    <div id="landing-url-group">
+      <label for="landingUrl">정적 홈페이지 주소 (CUSTOM 모드 전용)</label>
+      <input th:field="*{landingUrl}" placeholder="https://my-restaurant.com">
+      <p class="help">CUSTOM 모드일 때 NFC 탭 후 첫 번째로 보여줄 페이지 주소예요.</p>
+      <p class="error" th:if="${#fields.hasErrors('landingUrl')}" th:errors="*{landingUrl}">에러</p>
+    </div>
+
+    <p class="form-actions"><button>저장</button></p>
+  </form>
+</main>
+
+<script>
+function onModeChange(select) {
+  var group = document.getElementById('landing-url-group');
+  var input = document.getElementById('landingUrl');
+  if (select.value === 'DIRECT') {
+    group.style.display = 'none';
+    input.value = '';
+  } else {
+    group.style.display = '';
+  }
+}
+// 페이지 로드 시 현재 선택값으로 초기화
+document.addEventListener('DOMContentLoaded', function () {
+  onModeChange(document.getElementById('landingMode'));
+});
+</script>
+</body>
+</html>

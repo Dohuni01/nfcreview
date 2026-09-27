@@ -1,0 +1,36 @@
+# (9부) 운영 서버에서만 켜지는 설정: SPRING_PROFILES_ACTIVE=prod
+# application.yml 위에 덧씌워져요.
+#
+# 운영에선 기본값을 두지 않아요. 환경변수를 빠뜨리면 앱이 아예 안 켜지게!
+# (틀린 값으로 조용히 켜지는 것보다 안 켜지는 게 훨씬 안전해요)
+#
+# ⚠️ ${이름:} 처럼 콜론(:) 뒤를 꼭 비워두세요. 뜻: "환경변수가 없으면 빈 값"
+#    → 빈 값은 AppProperties의 @NotBlank 검증에 걸려서 앱이 켜지지 않아요.
+#    ${이름}만 쓰면 스프링은 못 찾은 이름을 "글자 그대로" 넣고 켜져버려요.
+#    그러면 관리자 비밀번호가 ${ADMIN_PASSWORD}라는 글자가 되고, 공개 저장소를 본 누구나 로그인할 수 있어요.
+
+spring:
+  datasource:
+    url: ${DB_URL:}              # 비어 있으면 "Failed to configure a DataSource" 로 안 켜져요
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
+  thymeleaf:
+    cache: true
+
+app:
+  base-url: ${APP_BASE_URL:}
+  admin:
+    username: ${ADMIN_USERNAME:}
+    password: ${ADMIN_PASSWORD:}
+
+server:
+  # 앞단의 Caddy가 붙여주는 X-Forwarded-* 헤더를 믿어서 "원래 요청은 https였다"를 알게 해요
+  forward-headers-strategy: native
+  servlet:
+    session:
+      cookie:
+        secure: true   # 로그인 쿠키는 https에서만 보내요
+
+logging:
+  level:
+    org.hibernate.SQL: info   # 운영에선 SQL 로그 끄기

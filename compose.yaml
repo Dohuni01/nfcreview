@@ -1,0 +1,34 @@
+# 로컬 PC에서 "도커로 돌려보기"용. 운영 서버용은 deploy/compose.yaml
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: nfcreview
+      MYSQL_USER: nfcreview
+      MYSQL_PASSWORD: localpass
+      MYSQL_ROOT_PASSWORD: localroot
+    ports:
+      - "3307:3306"   # PC에 설치된 MySQL(3306)과 겹치지 않게 3307로 열어요
+    volumes:
+      - local-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "nfcreview", "-plocalpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/nfcreview?serverTimezone=UTC
+      DB_USERNAME: nfcreview
+      DB_PASSWORD: localpass
+      TZ: Asia/Seoul
+    ports:
+      - "8080:8080"
+
+volumes:
+  local-db-data:

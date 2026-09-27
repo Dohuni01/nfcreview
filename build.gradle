@@ -1,0 +1,63 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.1.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.dohun'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+// flyway-mysql 최신이 11.8.2라 flyway 전체를 11.8.2로 맞춰요
+ext['flyway.version'] = '11.8.2'
+
+dependencies {
+	// Part 1: web + database (Flyway needs its own starter since Spring Boot 4)
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-flyway'
+	implementation 'org.flywaydb:flyway-mysql'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// Part 3: server-rendered HTML pages
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	// Part 4: admin login + input validation
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Part 9: /actuator/health for monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+	// Part 7: tests (each test starter also brings JUnit, AssertJ, Mockito)
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Part 1: read source files as UTF-8 (Korean comments/strings on Windows)
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// Part 8: build only the runnable jar, with a fixed name for the Dockerfile
+tasks.named('jar') {
+	enabled = false
+}
+tasks.named('bootJar') {
+	archiveFileName = 'app.jar'
+}

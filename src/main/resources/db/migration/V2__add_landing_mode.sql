@@ -1,0 +1,4 @@
+ALTER TABLE store
+    ADD COLUMN landing_mode VARCHAR(10) NOT NULL DEFAULT 'DIRECT',
+    ADD COLUMN landing_url  VARCHAR(1000) NULL,
+    DROP COLUMN benefit_text;

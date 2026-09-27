@@ -1,0 +1,249 @@
+/* (4부) 관리 화면 공통 스타일 — 브랜드 컬러(한지·붉은 톤·구리)를 landing.css와 통일 */
+:root {
+  --paper:       #f3ead9;   /* landing.css와 동일 */
+  --bg:          #f0e8d5;   /* paper보다 살짝 어두운 페이지 배경 */
+  --panel:       #fdfaf4;   /* 한지 위의 패널 — 순백보다 따뜻하게 */
+  --ink:         #2b1d14;   /* landing.css와 동일 */
+  --muted:       #6b5a4a;   /* landing.css와 동일 */
+  --line:        #d9cfc0;   /* 테이블·패널 테두리 (따뜻한 베이지) */
+  --red:         #9e1b1b;   /* landing.css와 동일 */
+  --red-dark:    #7a1414;
+  --red-soft:    #fbeaea;
+  --copper:      #b8733a;   /* landing.css와 동일 */
+  --copper-soft: #f5ece0;
+  --green:       #1f7a4d;
+  --green-soft:  #e5f4ec;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  /* 한지 섬유 질감 — landing.css와 같은 점 무늬, 관리화면용으로 조금 더 연하게 */
+  background-image:
+    radial-gradient(rgba(120, 90, 50, 0.055) 1px, transparent 1px),
+    radial-gradient(rgba(120, 90, 50, 0.035) 1px, transparent 1px);
+  background-size: 7px 7px, 13px 13px;
+  background-position: 0 0, 3px 5px;
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a { color: var(--red); }
+a:hover { color: var(--red-dark); }
+
+/* ── 상단 내비게이션 ── */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  height: 52px;
+  background: var(--panel);
+  border-bottom: 2px solid var(--copper);
+  box-shadow: 0 2px 8px rgba(60, 30, 10, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.brand {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--red);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+.brand:hover { color: var(--red-dark); }
+
+/* ── 레이아웃 ── */
+.container { max-width: 960px; margin: 0 auto; padding: 28px 20px 64px; }
+.container.narrow { max-width: 620px; }
+.login { max-width: 360px; margin: 10vh auto; padding: 0 20px; }
+
+.title-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+h1 { font-size: 22px; font-weight: 700; margin: 8px 0 18px; }
+h2 { font-size: 16px; font-weight: 700; margin: 32px 0 10px; color: var(--ink); }
+h2::after {
+  content: '';
+  display: block;
+  height: 2px;
+  width: 28px;
+  background: var(--copper);
+  margin-top: 4px;
+  border-radius: 2px;
+}
+
+/* ── 패널 (카드형 박스) ── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(60, 30, 10, 0.06);
+}
+
+/* ── 테이블 ── */
+.table-wrap { overflow-x: auto; border-radius: 10px; box-shadow: 0 1px 4px rgba(60, 30, 10, 0.06); }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+th, td { padding: 10px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+th { background: #ede5d5; color: var(--muted); font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
+tr:last-child td { border-bottom: 0; }
+tr.inactive td { color: var(--muted); }
+tr:hover td { background: rgba(184, 115, 58, 0.04); }
+
+/* ── 버튼 ── */
+.btn, button {
+  display: inline-block;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--red);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn:hover, button:hover { background: var(--red-dark); color: #fff; }
+.btn.secondary, button.secondary {
+  background: var(--copper-soft);
+  color: var(--copper);
+  border: 1px solid rgba(184, 115, 58, 0.25);
+}
+.btn.secondary:hover, button.secondary:hover { background: #ead9c8; color: var(--red-dark); }
+button.small { padding: 5px 10px; font-size: 13px; }
+button.link { background: none; color: var(--muted); padding: 0; font-size: 13px; }
+button.link:hover { background: none; color: var(--ink); }
+button.wide { width: 100%; }
+form.inline { display: inline; }
+.form-actions { margin: 24px 0 0; }
+
+/* ── 폼 입력 ── */
+label { display: block; font-weight: 600; margin: 16px 0 6px; font-size: 14px; }
+input, textarea, select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--copper);
+  box-shadow: 0 0 0 3px rgba(184, 115, 58, 0.15);
+}
+.row-form { display: flex; gap: 8px; align-items: center; }
+.row-form input { flex: 1; }
+
+/* ── 알림 / 도움말 ── */
+.help  { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+.error { color: var(--red);   font-size: 13px; margin: 6px 0 0; }
+.flash { background: var(--green-soft); color: var(--green); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; border-left: 3px solid var(--green); }
+.alert { background: var(--red-soft);   color: var(--red);   padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid var(--red); }
+.empty { color: var(--muted); padding: 16px 0; }
+.muted { color: var(--muted); }
+
+/* ── 코드 ── */
+code {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px;
+  background: var(--copper-soft);
+  padding: 2px 6px;
+  border-radius: 5px;
+  word-break: break-all;
+  color: #7a4a1a;
+}
+
+/* ── 뱃지 ── */
+.badge { font-size: 12px; padding: 3px 8px; border-radius: 999px; font-weight: 600; }
+.badge.on { background: var(--green-soft); color: var(--green); }
+.badge.off { background: #eeeeee; color: var(--muted); }
+
+/* 랜딩 모드 뱃지 */
+.mode-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+}
+.mode-direct { background: var(--copper-soft); color: var(--copper); border: 1px solid rgba(184,115,58,0.3); }
+.mode-custom { background: var(--red-soft);    color: var(--red);    border: 1px solid rgba(158, 27,27,0.2); }
+
+.actions { white-space: nowrap; }
+.actions > * { margin-right: 8px; }
+
+/* ── 통계 요약 카드 ── */
+.summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.metric {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 16px 14px;
+  border-left: 4px solid var(--copper);
+  box-shadow: 0 1px 4px rgba(60, 30, 10, 0.06);
+}
+.metric span { display: block; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+.metric strong { font-size: 28px; font-weight: 700; color: var(--ink); }
+
+/* 전환율 카드만 구리색 강조 */
+.metric.highlight { border-left-color: var(--red); }
+.metric.highlight strong { color: var(--red); }
+
+/* ── 탭 (기간 선택) ── */
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tabs a {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--copper-soft);
+  color: var(--copper);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(184,115,58,0.2);
+  transition: background 0.15s;
+}
+.tabs a:hover { background: #ead5bb; color: var(--red-dark); }
+.tabs a.active { background: var(--copper); color: #fff; border-color: var(--copper); }
+
+/* ── 막대 그래프 ── */
+.bar-cell { width: 45%; }
+.bar { height: 10px; min-width: 2px; border-radius: 999px; background: var(--copper); }
+
+/* ── 로그인 전용 ── */
+.login-logo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e0a26a, var(--copper) 55%, #8a4f22);
+  box-shadow: inset 0 2px 6px rgba(255,255,255,0.3), 0 4px 12px rgba(138,79,34,0.28);
+}
+.login h1 {
+  text-align: center;
+  font-size: 20px;
+  color: var(--ink);
+  margin: 0 0 20px;
+  letter-spacing: 0.01em;
+}
+.login h1 span { color: var(--red); }
+
+@media (max-width: 640px) {
+  .summary { grid-template-columns: 1fr; }
+  .nav { padding: 0 14px; }
+  .container { padding: 18px 14px 48px; }
+}

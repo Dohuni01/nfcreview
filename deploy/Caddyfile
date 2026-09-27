@@ -1,0 +1,6 @@
+# {$DOMAIN}은 compose.yaml에서 넘겨준 도메인으로 바뀌어요.
+# 도메인만 적어두면 Caddy가 HTTPS 인증서(Let's Encrypt)를 자동으로 받고 갱신까지 해요.
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:8080
+}

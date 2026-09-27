@@ -1,0 +1,5 @@
+# 스크립트는 항상 LF(\n) 줄바꿈으로. 윈도우 CRLF(\r\n)가 섞이면 리눅스에서 실행이 안 돼요.
+/gradlew        text eol=lf
+*.sh            text eol=lf
+*.bat           text eol=crlf
+*.jar           binary

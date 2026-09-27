@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('로그인')}"></head>
+<body>
+<main class="login">
+  <!-- 브랜드 씰 -->
+  <div class="login-logo" aria-hidden="true">
+    <svg viewBox="0 0 48 48" width="32" height="32" fill="none" stroke="#fff7ee" stroke-width="3" stroke-linecap="round">
+      <path d="M17 16c3 5 3 11 0 16"/>
+      <path d="M24 11c5 8 5 18 0 26"/>
+      <path d="M31 6c7 11 7 25 0 36"/>
+    </svg>
+  </div>
+
+  <h1>NFC <span>리뷰</span> 관리</h1>
+
+  <!-- 로그인 실패 시 스프링 시큐리티가 /admin/login?error 로 보내요. ${param.error}는 그 ?error를 봐요 -->
+  <div class="alert" th:if="${param.error}">아이디 또는 비밀번호가 맞지 않아요.</div>
+  <div class="flash" th:if="${param.logout}">로그아웃했어요.</div>
+
+  <form class="panel" th:action="@{/admin/login}" method="post">
+    <label for="username">아이디</label>
+    <input id="username" name="username" autocomplete="username" required autofocus>
+
+    <label for="password">비밀번호</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+    <p class="form-actions"><button class="wide">로그인</button></p>
+  </form>
+</main>
+</body>
+</html>

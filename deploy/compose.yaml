@@ -1,0 +1,67 @@
+# 운영 서버용 (9부~). 서버에서 이 폴더(deploy)로 들어가서: docker compose up -d
+# 비밀값은 같은 폴더의 .env 파일에서 읽어요 (.env.example 참고, Git에는 절대 올리지 않기)
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"   # 로그 파일 하나 최대 10MB
+    max-file: "3"     # 3개까지만 보관 → 로그가 디스크를 가득 채우는 사고 방지
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped            # 서버가 재부팅되거나 죽어도 다시 켜져요
+    environment:
+      MYSQL_DATABASE: nfcreview
+      MYSQL_USER: nfcreview
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required in .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD is required in .env}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "nfcreview", "-p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging: *default-logging
+    # ports를 적지 않았어요 → DB는 서버 밖에서 접속할 수 없어요
+
+  app:
+    image: ${APP_IMAGE:?APP_IMAGE is required in .env}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod     # application-prod.yml 켜기
+      TZ: Asia/Seoul                   # 로그 시각을 한국 시간으로 (저장은 UTC 그대로)
+      DB_URL: jdbc:mysql://db:3306/nfcreview?serverTimezone=UTC
+      DB_USERNAME: nfcreview
+      DB_PASSWORD: ${DB_PASSWORD}
+      APP_BASE_URL: https://${DOMAIN}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:?ADMIN_USERNAME is required in .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required in .env}
+    logging: *default-logging
+    # 앱(8080)도 밖에 열지 않아요. 반드시 Caddy(HTTPS)를 거쳐서만 들어와요.
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"                  # HTTP/3
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN is required in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data               # HTTPS 인증서 보관. 지우면 재발급하다 발급 횟수 제한에 걸릴 수 있어요
+      - caddy-config:/config
+    logging: *default-logging
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:

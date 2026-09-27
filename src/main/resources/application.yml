@@ -1,0 +1,49 @@
+# 괄호 안의 숫자는 이 줄을 추가하는 파트예요. 예: (1부)
+
+spring:
+  application:
+    name: nfcreview
+
+  # (1부) DB 연결. ${이름:기본값} → 환경변수가 있으면 그 값, 없으면 기본값(로컬 개발용)
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3307/nfcreview?serverTimezone=UTC}
+    username: ${DB_USERNAME:nfcreview}
+    password: ${DB_PASSWORD:localpass}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 3000
+
+  # (1부) 테이블은 Flyway(db/migration의 SQL)가 만들고, Hibernate는 "엔티티와 테이블이 맞는지"만 검사해요
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false   # 요청이 끝날 때까지 DB 연결을 붙잡아두지 않게
+
+  # (3부) 개발 중엔 HTML을 고치면 바로 반영 (운영에선 application-prod.yml에서 true)
+  thymeleaf:
+    cache: false
+
+  # (6부) 화면 언어를 한국어로 고정. 없으면 브라우저 언어를 따라가서, 영어로 설정된 폰에서는
+  # 통계의 요일이 "09.24 (Thu)"처럼 나와요. 한국 가게용 서비스라 항상 "09.24 (목)"으로.
+  web:
+    locale: ko_KR
+    locale-resolver: fixed
+
+# (4부) 우리 앱만의 설정 → config/AppProperties.java로 받아요
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}   # NFC 카드에 쓸 주소의 앞부분
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:admin1234}           # 로컬 전용 기본값. 운영에선 반드시 환경변수로
+
+# (9부) 밖으로 여는 관리용 주소는 /actuator/health 하나만
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+# (1부) 실행되는 SQL을 콘솔에 보여줘요 (공부용)
+logging:
+  level:
+    org.hibernate.SQL: debug

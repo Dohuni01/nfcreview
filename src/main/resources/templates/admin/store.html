@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('카드 관리')}"></head>
+<body>
+<header th:replace="~{admin/fragments :: nav}"></header>
+<main class="container">
+  <p><a th:href="@{/admin/stores}">← 가게 목록</a></p>
+  <div th:replace="~{admin/fragments :: flash}"></div>
+
+  <div class="title-row">
+    <h1 th:text="${store.name}">가게 이름</h1>
+    <div class="actions">
+      <a class="btn secondary" th:href="@{/admin/stores/{id}/edit(id=${store.id})}">정보 수정</a>
+      <a class="btn" th:href="@{/admin/stores/{id}/stats(id=${store.id})}">통계 보기</a>
+    </div>
+  </div>
+
+  <section class="panel">
+    <p><strong>리뷰 주소</strong><br><code th:text="${store.reviewUrl}">https://...</code></p>
+    <p><strong>랜딩 모드</strong><br><span th:text="${store.landingMode}">DIRECT</span></p>
+    <p th:if="${store.landingMode.name() == 'CUSTOM'}">
+      <strong>정적 홈페이지</strong><br><code th:text="${store.landingUrl} ?: '(미입력)'">https://...</code>
+    </p>
+  </section>
+
+  <h2>카드 발급</h2>
+  <form class="panel row-form" th:action="@{/admin/stores/{id}/cards(id=${store.id})}" method="post">
+    <input name="label" maxlength="50" placeholder="위치 메모 (예: 3번 테이블)">
+    <button>카드 만들기</button>
+  </form>
+
+  <h2>카드 목록</h2>
+  <p class="help">"NFC에 쓸 주소"를 복사해서 NFC Tools로 카드에 쓰면 돼요. 미리보기로 열면 태그(TAP)는 기록되지 않아요.</p>
+  <p class="empty" th:if="${#lists.isEmpty(cards)}">아직 카드가 없어요.</p>
+
+  <div class="table-wrap" th:unless="${#lists.isEmpty(cards)}">
+    <table>
+      <thead>
+      <tr><th>위치</th><th>NFC에 쓸 주소</th><th>상태</th><th></th></tr>
+      </thead>
+      <tbody>
+      <tr th:each="card : ${cards}" th:classappend="${card.active} ? '' : 'inactive'">
+        <td th:text="${card.label} ?: '(메모 없음)'">3번 테이블</td>
+        <td>
+          <code th:text="${baseUrl} + '/t/' + ${card.code}">http://localhost:8080/t/abc</code>
+          <button type="button" class="small secondary"
+                  th:data-url="${baseUrl} + '/t/' + ${card.code}"
+                  onclick="navigator.clipboard.writeText(this.dataset.url).then(() => { this.textContent = '복사됨'; })">복사</button>
+        </td>
+        <td>
+          <span class="badge" th:classappend="${card.active} ? 'on' : 'off'"
+                th:text="${card.active} ? '사용 중' : '꺼짐'">사용 중</span>
+        </td>
+        <td class="actions">
+          <!-- 상태를 바꾸는 요청이라 POST 폼이에요 -->
+          <form class="inline" th:action="@{/admin/cards/{id}/toggle(id=${card.id})}" method="post">
+            <button class="small secondary" th:text="${card.active} ? '끄기' : '켜기'">끄기</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+</body>
+</html>

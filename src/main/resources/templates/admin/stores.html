@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('가게 목록')}"></head>
+<body>
+<header th:replace="~{admin/fragments :: nav}"></header>
+<main class="container">
+  <div th:replace="~{admin/fragments :: flash}"></div>
+
+  <div class="title-row">
+    <h1>가게 목록</h1>
+    <a class="btn" th:href="@{/admin/stores/new}">+ 가게 추가</a>
+  </div>
+
+  <p class="empty" th:if="${#lists.isEmpty(stores)}">아직 등록된 가게가 없어요. 첫 가게를 추가해보세요.</p>
+
+  <div class="table-wrap" th:unless="${#lists.isEmpty(stores)}">
+    <table>
+      <thead>
+      <tr><th>이름</th><th>랜딩 모드</th><th></th></tr>
+      </thead>
+      <tbody>
+      <tr th:each="store : ${stores}">
+        <td th:text="${store.name}">빨간주막</td>
+        <td>
+          <span class="mode-badge"
+                th:classappend="${store.landingMode.name() == 'CUSTOM'} ? 'mode-custom' : 'mode-direct'"
+                th:text="${store.landingMode}">DIRECT</span>
+        </td>
+        <td class="actions">
+          <a th:href="@{/admin/stores/{id}(id=${store.id})}">카드 관리</a>
+          <a th:href="@{/admin/stores/{id}/stats(id=${store.id})}">통계</a>
+          <button type="button" class="small secondary"
+                  th:data-store-id="${store.id}"
+                  th:data-store-name="${store.name}"
+                  onclick="openDeleteDialog(this)">삭제</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- 삭제 확인 다이얼로그 -->
+<dialog id="delete-dialog">
+  <p class="dialog-title">가게를 삭제하시겠어요?</p>
+  <p class="dialog-desc" id="dialog-store-name"></p>
+  <p class="dialog-warn">카드와 통계 기록이 모두 삭제되며 되돌릴 수 없어요.</p>
+  <form id="delete-form" method="post">
+    <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+    <div class="dialog-actions">
+      <button type="button" class="secondary" onclick="document.getElementById('delete-dialog').close()">아니요</button>
+      <button type="submit" id="confirm-delete-btn">네, 삭제할게요</button>
+    </div>
+  </form>
+</dialog>
+
+<style>
+/* 액션 셀: 카드 관리·통계는 왼쪽, 삭제는 오른쪽 끝 */
+td.actions { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+td.actions > * { margin-right: 0; }          /* admin.css의 일괄 margin-right 해제 */
+td.actions > button { margin-left: auto; }   /* 삭제 버튼만 오른쪽 끝 */
+
+dialog {
+  border: none;
+  border-radius: 14px;
+  padding: 28px 24px 20px;
+  max-width: 340px;
+  width: calc(100% - 40px);
+  box-shadow: 0 8px 32px rgba(43, 29, 20, 0.18);
+  background: var(--panel);
+}
+dialog::backdrop { background: rgba(43, 29, 20, 0.45); }
+.dialog-title { margin: 0 0 6px; font-size: 17px; font-weight: 700; color: var(--ink); }
+.dialog-desc  { margin: 0 0 10px; font-weight: 600; color: var(--red); }
+.dialog-warn  { margin: 0 0 22px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.dialog-actions button { min-width: 80px; }
+</style>
+
+<script>
+function openDeleteDialog(btn) {
+  var storeId   = btn.dataset.storeId;
+  var storeName = btn.dataset.storeName;
+  document.getElementById('dialog-store-name').textContent = storeName;
+  document.getElementById('delete-form').action = '/admin/stores/' + storeId + '/delete';
+  document.getElementById('delete-dialog').showModal();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('통계')}"></head>
+<body>
+<header th:replace="~{admin/fragments :: nav}"></header>
+<main class="container">
+  <p><a th:href="@{/admin/stores}">← 가게 목록</a></p>
+
+  <div class="title-row">
+    <h1 th:text="|${store.name} 통계|">가게 통계</h1>
+    <nav class="tabs">
+      <a th:each="d : ${periods}"
+         th:href="@{/admin/stores/{id}/stats(id=${store.id}, days=${d})}"
+         th:classappend="${d == stats.days} ? 'active'"
+         th:text="|최근 ${d}일|">최근 30일</a>
+    </nav>
+  </div>
+
+  <section class="summary">
+    <div class="metric"><span>태그</span><strong th:text="${stats.taps}">0</strong></div>
+    <div class="metric"><span>리뷰 버튼</span><strong th:text="${stats.clicks}">0</strong></div>
+    <div class="metric highlight"><span>전환율</span><strong th:text="|${stats.conversionPercent}%|">0%</strong></div>
+  </section>
+  <p class="help">전환율 = 리뷰 버튼 수 ÷ 태그 수. 날짜는 한국 시간 기준이에요. 실제로 리뷰를 썼는지는 네이버에서만 알 수 있어요.</p>
+
+  <h2>날짜별</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+      <tr><th>날짜</th><th>태그</th><th class="bar-cell"></th><th>리뷰 버튼</th></tr>
+      </thead>
+      <tbody>
+      <tr th:each="row : ${stats.daily}">
+        <td th:text="${#temporals.format(row.day, 'MM.dd (E)')}">09.24 (목)</td>
+        <td th:text="${row.taps}">0</td>
+        <!-- 막대 길이 = 기간 중 가장 많았던 날 대비 비율 -->
+        <td class="bar-cell"><div class="bar" th:style="|width: ${row.barPercent}%|"></div></td>
+        <td th:text="${row.clicks}">0</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>카드별</h2>
+  <p class="empty" th:if="${#lists.isEmpty(stats.cards)}">아직 발급한 카드가 없어요.</p>
+  <div class="table-wrap" th:unless="${#lists.isEmpty(stats.cards)}">
+    <table>
+      <thead>
+      <tr><th>위치</th><th>코드</th><th>태그</th><th>리뷰 버튼</th><th>전환율</th></tr>
+      </thead>
+      <tbody>
+      <tr th:each="card : ${stats.cards}" th:classappend="${card.active} ? '' : 'inactive'">
+        <td th:text="${card.label} ?: '(메모 없음)'">3번 테이블</td>
+        <td><code th:text="${card.code}">code</code></td>
+        <td th:text="${card.taps}">0</td>
+        <td th:text="${card.clicks}">0</td>
+        <td th:text="|${card.conversionPercent}%|">0%</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>요청을 처리하지 못했어요</title>
+  <link rel="stylesheet" th:href="@{/css/landing.css}">
+</head>
+<body>
+<!--
+  (3부) 404가 아닌 400번대 오류(400 잘못된 요청, 403 거부, 405 잘못된 방식)일 때.
+  스프링은 error/403.html → error/4xx.html 순서로 찾아요. 404는 더 구체적인 error/404.html이 이겨요.
+  가장 흔한 경우: 관리 화면을 오래 열어두면 로그인(세션)이 풀리고, 그 상태로 저장을 누르면
+  CSRF 토큰이 맞지 않아 403이 나요. 이 파일이 없으면 영어로 된 Whitelabel Error Page가 떠요.
+-->
+<main class="card">
+  <p class="eyebrow" th:text="${status}">400</p>
+  <h1>요청을 처리하지 못했어요</h1>
+  <p class="benefit">페이지를 새로고침한 뒤 다시 시도해 주세요.</p>
+  <p class="hint">관리 화면이라면 로그인이 풀렸을 수 있어요. <a th:href="@{/admin/login}">다시 로그인</a></p>
+</main>
+</body>
+</html>

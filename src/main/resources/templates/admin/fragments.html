@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--
+  (4부) 여러 관리 화면이 같이 쓰는 조각(fragment)들.
+  다른 화면에서 th:replace="~{admin/fragments :: 조각이름}" 으로 가져다 써요.
+-->
+<head th:fragment="head(title)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="|${title} · NFC 리뷰 관리|">관리</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<header th:fragment="nav" class="nav">
+  <a class="brand" th:href="@{/admin/stores}">NFC 리뷰 관리</a>
+  <!-- 로그아웃은 링크가 아니라 POST 폼. th:action이 CSRF 토큰을 숨은 칸으로 자동으로 넣어줘요 -->
+  <form class="inline" th:action="@{/admin/logout}" method="post">
+    <button class="link">로그아웃</button>
+  </form>
+</header>
+
+<!-- (5부) redirect 뒤에 한 번만 보여줄 메시지 (addFlashAttribute로 넘긴 값) -->
+<div th:fragment="flash">
+  <div class="flash" th:if="${message}" th:text="${message}">성공 메시지</div>
+  <div class="alert" th:if="${error}" th:text="${error}">에러 메시지</div>
+</div>
+
+</body>
+</html>
