@@ -17,7 +17,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    open-in-view: false   # 요청이 끝날 때까지 DB 연결을 붙잡아두지 않게
+    open-in-view: false # 요청이 끝날 때까지 DB 연결을 붙잡아두지 않게
 
   # (3부) 개발 중엔 HTML을 고치면 바로 반영 (운영에선 application-prod.yml에서 true)
   thymeleaf:
@@ -31,10 +31,13 @@ spring:
 
 # (4부) 우리 앱만의 설정 → config/AppProperties.java로 받아요
 app:
-  base-url: ${APP_BASE_URL:http://localhost:8080}   # NFC 카드에 쓸 주소의 앞부분
+  base-url: ${APP_BASE_URL:http://localhost:8080} # NFC 카드에 쓸 주소의 앞부분
   admin:
-    username: ${ADMIN_USERNAME:admin}
-    password: ${ADMIN_PASSWORD:admin1234}           # 로컬 전용 기본값. 운영에선 반드시 환경변수로
+    username: ${ADMIN_USERNAME:dohun}
+    password: ${ADMIN_PASSWORD:0000} # 로컬 전용 기본값. 운영에선 반드시 환경변수로
+
+server:
+  port: ${PORT:8080} # Railway는 PORT 환경변수를 주입해요. 로컬에선 8080 기본값 사용
 
 # (9부) 밖으로 여는 관리용 주소는 /actuator/health 하나만
 management:
