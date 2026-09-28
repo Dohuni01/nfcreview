@@ -29,47 +29,73 @@
   </section>
   <p class="help">전환율 = 리뷰 버튼 수 ÷ 태그 수. 날짜는 한국 시간 기준이에요. 실제로 리뷰를 썼는지는 네이버에서만 알 수 있어요.</p>
 
-  <h2>날짜별</h2>
-  <div class="table-wrap">
-    <table>
-      <thead>
-      <tr><th>날짜</th><th>태그</th><th class="bar-cell"></th><th>리뷰 버튼</th></tr>
-      </thead>
-      <tbody>
-      <tr th:each="row : ${stats.daily}">
-        <td th:text="${#temporals.format(row.day, 'MM.dd (E)')}">09.24 (목)</td>
-        <td th:text="${row.taps}">0</td>
-        <!-- 막대 길이 = 기간 중 가장 많았던 날 대비 비율 -->
-        <td class="bar-cell"><div class="bar" th:style="|width: ${row.barPercent}%|"></div></td>
-        <td th:text="${row.clicks}">0</td>
-      </tr>
-      </tbody>
-    </table>
+  <!-- (1부) 일별 TAP/CLICK 라인 차트 -->
+  <h2>일별 추이</h2>
+  <div class="chart-wrap"><canvas id="daily-chart"></canvas></div>
+
+  <!-- (2부) 카드별 막대 차트 -->
+  <h2>카드별 비교</h2>
+  <p class="empty" th:if="${#lists.isEmpty(stats.cards)}">아직 발급한 카드가 없어요.</p>
+  <div class="chart-wrap" th:unless="${#lists.isEmpty(stats.cards)}">
+    <canvas id="card-chart"></canvas>
   </div>
 
-  <h2>카드별</h2>
-  <p class="empty" th:if="${#lists.isEmpty(stats.cards)}">아직 발급한 카드가 없어요.</p>
-  <div class="table-wrap" th:unless="${#lists.isEmpty(stats.cards)}">
-    <table>
-      <thead>
-      <tr><th>위치</th><th>코드</th><th>태그</th><th>리뷰 버튼</th><th>전환율</th></tr>
-      </thead>
-      <tbody>
-      <tr th:each="card : ${stats.cards}" th:classappend="${card.active} ? '' : 'inactive'">
-        <td th:text="${card.label} ?: '(메모 없음)'">3번 테이블</td>
-        <td><code th:text="${card.code}">code</code></td>
-        <td th:text="${card.taps}">0</td>
-        <td th:text="${card.clicks}">0</td>
-        <td th:text="|${card.conversionPercent}%|">0%</td>
-      </tr>
-      </tbody>
-    </table>
+  <!-- (3부) 요일×시간 히트맵 -->
+  <h2>시간대별 태그</h2>
+  <p class="help">지난 <span th:text="${stats.days}">30</span>일간 손님이 NFC를 태그한 시간대예요. 한국 시간 기준이에요.</p>
+  <div class="heatmap-outer">
+    <div id="heatmap-grid" class="heatmap-grid"></div>
+    <div class="heatmap-legend">
+      <span>적음</span>
+      <div class="legend-bar"></div>
+      <span>많음</span>
+    </div>
   </div>
+
+  <!-- (4부) 기존 테이블: 접기/펼치기 -->
+  <details class="section-details">
+    <summary>날짜별 상세</summary>
+    <div class="table-wrap">
+      <table>
+        <thead>
+        <tr><th>날짜</th><th>태그</th><th class="bar-cell"></th><th>리뷰 버튼</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${stats.daily}">
+          <td th:text="${#temporals.format(row.day, 'MM.dd (E)')}">09.24 (목)</td>
+          <td th:text="${row.taps}">0</td>
+          <td class="bar-cell"><div class="bar" th:style="|width: ${row.barPercent}%|"></div></td>
+          <td th:text="${row.clicks}">0</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="section-details">
+    <summary>카드별 상세</summary>
+    <p class="empty" th:if="${#lists.isEmpty(stats.cards)}">아직 발급한 카드가 없어요.</p>
+    <div class="table-wrap" th:unless="${#lists.isEmpty(stats.cards)}">
+      <table>
+        <thead>
+        <tr><th>위치</th><th>코드</th><th>태그</th><th>리뷰 버튼</th><th>전환율</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="card : ${stats.cards}" th:classappend="${card.active} ? '' : 'inactive'">
+          <td th:text="${card.label} ?: '(메모 없음)'">3번 테이블</td>
+          <td><code th:text="${card.code}">code</code></td>
+          <td th:text="${card.taps}">0</td>
+          <td th:text="${card.clicks}">0</td>
+          <td th:text="|${card.conversionPercent}%|">0%</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 </main>
 
 <!-- 통계 초기화 2단 확인 다이얼로그 -->
 <dialog id="reset-dialog">
-  <!-- 1단계 -->
   <div id="reset-step1">
     <p class="dialog-title">통계를 초기화하시겠어요?</p>
     <p class="dialog-warn">태그·리뷰 버튼의 모든 기록이 삭제돼요. 카드와 가게 정보는 유지돼요.</p>
@@ -78,7 +104,6 @@
       <button type="button" class="danger" onclick="goResetStep2()">계속</button>
     </div>
   </div>
-  <!-- 2단계 -->
   <div id="reset-step2" style="display:none">
     <p class="dialog-title">정말로 삭제할까요?</p>
     <p class="dialog-warn" style="color:var(--red);font-weight:600">되돌릴 수 없어요. 한 번 더 확인해주세요.</p>
@@ -96,6 +121,38 @@
 .title-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .btn.small { padding: 6px 12px; font-size: 13px; }
 
+/* 차트 */
+.chart-wrap { margin: 0 0 28px; position: relative; }
+
+/* 히트맵 */
+.heatmap-outer { margin: 0 0 28px; overflow-x: auto; }
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 36px repeat(24, minmax(22px, 1fr));
+  grid-template-rows: 18px repeat(7, 28px);
+  gap: 3px;
+  min-width: 580px;
+}
+.hm-corner { }
+.hm-hour { font-size: 10px; color: var(--muted); text-align: center; align-self: end; padding-bottom: 2px; }
+.hm-dow  { font-size: 11px; color: var(--muted); display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; }
+.hm-cell { border-radius: 4px; cursor: default; transition: opacity 0.1s; }
+.hm-cell:hover { opacity: 0.75; }
+.heatmap-legend { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: var(--muted); min-width: 580px; }
+.legend-bar { flex: 0 0 120px; height: 8px; border-radius: 4px; background: linear-gradient(to right, #f0e8d5, #b8733a); }
+
+/* 상세 테이블 접기 */
+.section-details { margin: 12px 0 20px; }
+.section-details > summary {
+  cursor: pointer; color: var(--muted); font-size: 13px;
+  padding: 6px 0; list-style: none; user-select: none;
+}
+.section-details > summary::marker,
+.section-details > summary::-webkit-details-marker { display: none; }
+.section-details > summary::before { content: "▶  "; font-size: 9px; }
+.section-details[open] > summary::before { content: "▼  "; }
+
+/* 다이얼로그 */
 dialog {
   border: none; border-radius: 14px; padding: 28px 24px 20px;
   max-width: 340px; width: calc(100% - 40px);
@@ -109,6 +166,106 @@ dialog::backdrop { background: rgba(43,29,20,0.45); }
 button.danger { background: #c0392b; color: #fff; border: none; }
 button.danger:hover { background: #a93226; }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+// (1부) 일별 라인 차트 — stats.daily는 최신순이라 역순으로 넣어요
+const dailyLabels = [], dailyTaps = [], dailyClicks = [];
+/*[# th:each="row : ${#lists.reverse(stats.daily)}"]*/
+dailyLabels.push([[${#temporals.format(row.day, 'M/d')}]]);
+dailyTaps.push([[${row.taps}]]);
+dailyClicks.push([[${row.clicks}]]);
+/*[/]*/
+
+new Chart(document.getElementById('daily-chart'), {
+  type: 'line',
+  data: {
+    labels: dailyLabels,
+    datasets: [
+      { label: '태그',     data: dailyTaps,   borderColor: '#b8733a', backgroundColor: 'transparent', pointRadius: 3, tension: 0.35 },
+      { label: '리뷰 버튼', data: dailyClicks, borderColor: '#6b5a4a', backgroundColor: 'transparent', pointRadius: 3, tension: 0.35, borderDash: [4, 3] }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 12, padding: 16 } } },
+    scales: {
+      x: { ticks: { maxTicksLimit: 14, autoSkip: true } },
+      y: { beginAtZero: true, ticks: { stepSize: 1 } }
+    }
+  }
+});
+
+// (2부) 카드별 막대 차트
+const cardEl = document.getElementById('card-chart');
+if (cardEl) {
+  const cardLabels = [], cardTaps = [], cardClicks = [];
+  /*[# th:each="c : ${stats.cards}"]*/
+  cardLabels.push([[${c.label != null ? c.label : c.code}]]);
+  cardTaps.push([[${c.taps}]]);
+  cardClicks.push([[${c.clicks}]]);
+  /*[/]*/
+
+  new Chart(cardEl, {
+    type: 'bar',
+    data: {
+      labels: cardLabels,
+      datasets: [
+        { label: '태그',     data: cardTaps,   backgroundColor: '#b8733a' },
+        { label: '리뷰 버튼', data: cardClicks, backgroundColor: '#c9aa8a' }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 12, padding: 16 } } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+}
+
+// (3부) 요일×시간 히트맵
+const HEATMAP = /*[[${stats.heatmap}]]*/ [];
+const DOW = ['월', '화', '수', '목', '금', '토', '일'];
+const grid = document.getElementById('heatmap-grid');
+
+if (grid && HEATMAP && HEATMAP.length === 7) {
+  const maxCnt = Math.max(1, ...HEATMAP.flatMap(row => row));
+
+  // 첫 행: 빈 코너 + 시간 레이블(0h, 3h, … 21h)
+  const corner = document.createElement('div');
+  corner.className = 'hm-corner';
+  grid.appendChild(corner);
+  for (let h = 0; h < 24; h++) {
+    const el = document.createElement('div');
+    el.className = 'hm-hour';
+    el.textContent = h % 3 === 0 ? h + 'h' : '';
+    grid.appendChild(el);
+  }
+
+  // 7개 요일 행
+  for (let d = 0; d < 7; d++) {
+    const lbl = document.createElement('div');
+    lbl.className = 'hm-dow';
+    lbl.textContent = DOW[d];
+    grid.appendChild(lbl);
+
+    for (let h = 0; h < 24; h++) {
+      const cnt = (HEATMAP[d] && HEATMAP[d][h]) || 0;
+      const ratio = cnt / maxCnt;
+      const cell = document.createElement('div');
+      cell.className = 'hm-cell';
+      cell.title = DOW[d] + ' ' + h + '시: ' + cnt + '건';
+      // 구리색(#b8733a) 기반으로 불투명도 조절. 0건은 배경색
+      cell.style.backgroundColor = cnt === 0
+        ? '#f0e8d5'
+        : 'rgba(184,115,58,' + (0.15 + ratio * 0.85).toFixed(2) + ')';
+      grid.appendChild(cell);
+    }
+  }
+}
+/*]]>*/
+</script>
 
 <script>
 function openResetStep1() {

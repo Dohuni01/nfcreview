@@ -4,6 +4,7 @@ import com.dohun.nfcreview.domain.EventType;
 import com.dohun.nfcreview.repository.CardEventStatsRepository;
 import com.dohun.nfcreview.repository.CardEventStatsRepository.CardCountRow;
 import com.dohun.nfcreview.repository.CardEventStatsRepository.DailyCountRow;
+import com.dohun.nfcreview.repository.CardEventStatsRepository.HeatmapRow;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,9 +64,15 @@ public class StatsService {
                     taps, clicks, percent(clicks, taps)));
         }
 
+        // 4) 히트맵: 요일(0=월…6=일) × 시간(0~23) TAP 건수
+        int[][] heatmap = new int[7][24];
+        for (HeatmapRow row : statsRepository.countHeatmap(storeId, since)) {
+            heatmap[row.getDow()][row.getHr()] = row.getCnt().intValue();
+        }
+
         long totalTaps = daily.stream().mapToLong(DailyStat::taps).sum();
         long totalClicks = daily.stream().mapToLong(DailyStat::clicks).sum();
-        return new StoreStats(days, totalTaps, totalClicks, percent(totalClicks, totalTaps), daily, cards);
+        return new StoreStats(days, totalTaps, totalClicks, percent(totalClicks, totalTaps), daily, cards, heatmap);
     }
 
     // part ÷ whole 을 0~100 정수 퍼센트로. 0으로 나누는 경우를 막아요.
@@ -75,7 +82,7 @@ public class StatsService {
 
     // 화면에 넘길 결과들. record라서 Thymeleaf에서 ${stats.taps}처럼 바로 꺼내 써요.
     public record StoreStats(int days, long taps, long clicks, int conversionPercent,
-                             List<DailyStat> daily, List<CardStat> cards) {
+                             List<DailyStat> daily, List<CardStat> cards, int[][] heatmap) {
     }
 
     public record DailyStat(LocalDate day, long taps, long clicks, int barPercent) {
