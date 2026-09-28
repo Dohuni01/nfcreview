@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,10 +65,13 @@ public class StatsService {
                     taps, clicks, percent(clicks, taps)));
         }
 
-        // 4) 히트맵: 요일(0=월…6=일) × 시간(0~23) TAP 건수
-        int[][] heatmap = new int[7][24];
+        // 4) 히트맵: 요일(0=월…6=일) × 시간(0~23) TAP 건수. List<List<>>를 써야 Thymeleaf가 JS 배열로 직렬화해요.
+        List<List<Integer>> heatmap = new ArrayList<>(7);
+        for (int d = 0; d < 7; d++) {
+            heatmap.add(new ArrayList<>(Collections.nCopies(24, 0)));
+        }
         for (HeatmapRow row : statsRepository.countHeatmap(storeId, since)) {
-            heatmap[row.getDow()][row.getHr()] = row.getCnt().intValue();
+            heatmap.get(row.getDow()).set(row.getHr(), row.getCnt().intValue());
         }
 
         long totalTaps = daily.stream().mapToLong(DailyStat::taps).sum();
@@ -82,7 +86,7 @@ public class StatsService {
 
     // 화면에 넘길 결과들. record라서 Thymeleaf에서 ${stats.taps}처럼 바로 꺼내 써요.
     public record StoreStats(int days, long taps, long clicks, int conversionPercent,
-                             List<DailyStat> daily, List<CardStat> cards, int[][] heatmap) {
+                             List<DailyStat> daily, List<CardStat> cards, List<List<Integer>> heatmap) {
     }
 
     public record DailyStat(LocalDate day, long taps, long clicks, int barPercent) {

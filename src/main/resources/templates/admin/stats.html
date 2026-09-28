@@ -170,13 +170,16 @@ button.danger:hover { background: #a93226; }
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
 <script th:inline="javascript">
 /*<![CDATA[*/
-// (1부) 일별 라인 차트 — stats.daily는 최신순이라 역순으로 넣어요
+// (1부) 일별 라인 차트 — stats.daily는 최신순이므로 JS에서 뒤집어요
 const dailyLabels = [], dailyTaps = [], dailyClicks = [];
-/*[# th:each="row : ${#lists.reverse(stats.daily)}"]*/
+/*[# th:each="row : ${stats.daily}"]*/
 dailyLabels.push([[${#temporals.format(row.day, 'M/d')}]]);
 dailyTaps.push([[${row.taps}]]);
 dailyClicks.push([[${row.clicks}]]);
 /*[/]*/
+dailyLabels.reverse();
+dailyTaps.reverse();
+dailyClicks.reverse();
 
 new Chart(document.getElementById('daily-chart'), {
   type: 'line',
