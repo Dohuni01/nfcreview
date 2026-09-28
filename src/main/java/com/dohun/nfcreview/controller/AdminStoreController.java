@@ -127,4 +127,11 @@ public class AdminStoreController {
         redirectAttributes.addFlashAttribute("message", "카드 상태를 바꿨어요.");
         return "redirect:/admin/stores/" + storeId;
     }
+
+    @PostMapping("/cards/{cardId}/delete")
+    public String deleteCard(@PathVariable("cardId") Long cardId, RedirectAttributes redirectAttributes) {
+        Long storeId = adminService.deleteCard(cardId);
+        redirectAttributes.addFlashAttribute("message", "카드를 삭제했어요.");
+        return "redirect:/admin/stores/" + storeId;
+    }
 }

@@ -12,4 +12,6 @@ public interface CardEventRepository extends JpaRepository<CardEvent, Long> {
     long countByCardCodeAndEventType(String code, EventType eventType);
 
     void deleteByCardIdIn(Collection<Long> cardIds);
+
+    void deleteByCardId(Long cardId);
 }

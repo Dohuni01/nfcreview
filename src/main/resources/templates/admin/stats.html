@@ -5,15 +5,21 @@
 <header th:replace="~{admin/fragments :: nav}"></header>
 <main class="container">
   <p><a th:href="@{/admin/stores}">← 가게 목록</a></p>
+  <div th:replace="~{admin/fragments :: flash}"></div>
 
   <div class="title-row">
     <h1 th:text="|${store.name} 통계|">가게 통계</h1>
-    <nav class="tabs">
-      <a th:each="d : ${periods}"
-         th:href="@{/admin/stores/{id}/stats(id=${store.id}, days=${d})}"
-         th:classappend="${d == stats.days} ? 'active'"
-         th:text="|최근 ${d}일|">최근 30일</a>
-    </nav>
+    <div class="title-actions">
+      <nav class="tabs">
+        <a th:each="d : ${periods}"
+           th:href="@{/admin/stores/{id}/stats(id=${store.id}, days=${d})}"
+           th:classappend="${d == stats.days} ? 'active'"
+           th:text="|최근 ${d}일|">최근 30일</a>
+      </nav>
+      <a class="btn secondary small"
+         th:href="@{/admin/stores/{id}/stats/csv(id=${store.id}, days=${stats.days})}">CSV 내보내기</a>
+      <button type="button" class="btn danger small" onclick="openResetStep1()">통계 초기화</button>
+    </div>
   </div>
 
   <section class="summary">
@@ -60,5 +66,60 @@
     </table>
   </div>
 </main>
+
+<!-- 통계 초기화 2단 확인 다이얼로그 -->
+<dialog id="reset-dialog">
+  <!-- 1단계 -->
+  <div id="reset-step1">
+    <p class="dialog-title">통계를 초기화하시겠어요?</p>
+    <p class="dialog-warn">태그·리뷰 버튼의 모든 기록이 삭제돼요. 카드와 가게 정보는 유지돼요.</p>
+    <div class="dialog-actions">
+      <button type="button" class="secondary" onclick="document.getElementById('reset-dialog').close()">아니요</button>
+      <button type="button" class="danger" onclick="goResetStep2()">계속</button>
+    </div>
+  </div>
+  <!-- 2단계 -->
+  <div id="reset-step2" style="display:none">
+    <p class="dialog-title">정말로 삭제할까요?</p>
+    <p class="dialog-warn" style="color:var(--red);font-weight:600">되돌릴 수 없어요. 한 번 더 확인해주세요.</p>
+    <form th:action="@{/admin/stores/{id}/stats/reset(id=${store.id})}" method="post">
+      <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+      <div class="dialog-actions">
+        <button type="button" class="secondary" onclick="document.getElementById('reset-dialog').close()">취소</button>
+        <button type="submit" class="danger">네, 초기화할게요</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<style>
+.title-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.btn.small { padding: 6px 12px; font-size: 13px; }
+
+dialog {
+  border: none; border-radius: 14px; padding: 28px 24px 20px;
+  max-width: 340px; width: calc(100% - 40px);
+  box-shadow: 0 8px 32px rgba(43,29,20,0.18); background: var(--panel);
+}
+dialog::backdrop { background: rgba(43,29,20,0.45); }
+.dialog-title  { margin: 0 0 6px; font-size: 17px; font-weight: 700; color: var(--ink); }
+.dialog-warn   { margin: 0 0 22px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.dialog-actions button { min-width: 80px; }
+button.danger { background: #c0392b; color: #fff; border: none; }
+button.danger:hover { background: #a93226; }
+</style>
+
+<script>
+function openResetStep1() {
+  document.getElementById('reset-step1').style.display = '';
+  document.getElementById('reset-step2').style.display = 'none';
+  document.getElementById('reset-dialog').showModal();
+}
+function goResetStep2() {
+  document.getElementById('reset-step1').style.display = 'none';
+  document.getElementById('reset-step2').style.display = '';
+}
+</script>
 </body>
 </html>

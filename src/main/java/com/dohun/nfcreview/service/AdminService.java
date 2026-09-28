@@ -88,6 +88,27 @@ public class AdminService {
         return card.getStore().getId();
     }
 
+    /** 카드 삭제. 이벤트 기록을 먼저 지우고 카드를 삭제해요. 돌아갈 가게 id를 돌려줘요. */
+    @Transactional
+    public Long deleteCard(Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new NotFoundException("카드를 찾을 수 없어요: " + cardId));
+        Long storeId = card.getStore().getId();
+        cardEventRepository.deleteByCardId(cardId);
+        cardRepository.delete(card);
+        return storeId;
+    }
+
+    /** 가게의 통계 기록 전체 초기화. 카드와 가게 정보는 유지돼요. */
+    @Transactional
+    public void resetStats(Long storeId) {
+        List<Long> cardIds = cardRepository.findByStoreIdOrderByIdAsc(storeId)
+                .stream().map(Card::getId).toList();
+        if (!cardIds.isEmpty()) {
+            cardEventRepository.deleteByCardIdIn(cardIds);
+        }
+    }
+
     private String newUniqueCode() {
         for (int attempt = 0; attempt < MAX_CODE_ATTEMPTS; attempt++) {
             String code = codeGenerator.generate();

@@ -52,15 +52,59 @@
                 th:text="${card.active} ? '사용 중' : '꺼짐'">사용 중</span>
         </td>
         <td class="actions">
-          <!-- 상태를 바꾸는 요청이라 POST 폼이에요 -->
           <form class="inline" th:action="@{/admin/cards/{id}/toggle(id=${card.id})}" method="post">
             <button class="small secondary" th:text="${card.active} ? '끄기' : '켜기'">끄기</button>
           </form>
+          <button type="button" class="small danger"
+                  th:data-card-id="${card.id}"
+                  th:data-card-label="${card.label} ?: '(메모 없음)'"
+                  onclick="openCardDeleteDialog(this)">삭제</button>
         </td>
       </tr>
       </tbody>
     </table>
   </div>
 </main>
+
+<!-- 카드 삭제 확인 다이얼로그 -->
+<dialog id="card-delete-dialog">
+  <p class="dialog-title">카드를 삭제하시겠어요?</p>
+  <p class="dialog-desc" id="card-dialog-label"></p>
+  <p class="dialog-warn">이 카드의 태그·리뷰 기록이 모두 삭제되며 되돌릴 수 없어요.</p>
+  <form id="card-delete-form" method="post">
+    <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+    <div class="dialog-actions">
+      <button type="button" class="secondary" onclick="document.getElementById('card-delete-dialog').close()">아니요</button>
+      <button type="submit" class="danger">네, 삭제할게요</button>
+    </div>
+  </form>
+</dialog>
+
+<style>
+td.actions { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+td.actions > * { margin-right: 0; }
+
+dialog {
+  border: none; border-radius: 14px; padding: 28px 24px 20px;
+  max-width: 340px; width: calc(100% - 40px);
+  box-shadow: 0 8px 32px rgba(43,29,20,0.18); background: var(--panel);
+}
+dialog::backdrop { background: rgba(43,29,20,0.45); }
+.dialog-title  { margin: 0 0 6px; font-size: 17px; font-weight: 700; color: var(--ink); }
+.dialog-desc   { margin: 0 0 10px; font-weight: 600; color: var(--red); }
+.dialog-warn   { margin: 0 0 22px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.dialog-actions button { min-width: 80px; }
+button.danger { background: #c0392b; color: #fff; border: none; }
+button.danger:hover { background: #a93226; }
+</style>
+
+<script>
+function openCardDeleteDialog(btn) {
+  document.getElementById('card-dialog-label').textContent = btn.dataset.cardLabel;
+  document.getElementById('card-delete-form').action = '/admin/cards/' + btn.dataset.cardId + '/delete';
+  document.getElementById('card-delete-dialog').showModal();
+}
+</script>
 </body>
 </html>
