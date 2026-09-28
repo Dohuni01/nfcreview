@@ -51,11 +51,31 @@ public interface CardEventStatsRepository extends Repository<CardEvent, Long> {
         Long getCnt();
     }
 
+    // 요일(KST) × 시간(KST) × TAP 건수. 히트맵 렌더링에 써요.
+    @Query(value = """
+            SELECT WEEKDAY(CONVERT_TZ(e.occurred_at, '+00:00', '+09:00')) AS dow,
+                   HOUR(CONVERT_TZ(e.occurred_at, '+00:00', '+09:00'))    AS hr,
+                   COUNT(*) AS cnt
+            FROM card_event e
+            JOIN card c ON c.id = e.card_id
+            WHERE c.store_id = :storeId
+              AND e.occurred_at >= :since
+              AND e.event_type = 'TAP'
+            GROUP BY 1, 2
+            """, nativeQuery = true)
+    List<HeatmapRow> countHeatmap(@Param("storeId") Long storeId, @Param("since") Instant since);
+
     interface CardCountRow {
         String getCode();
         String getLabel();
         Boolean getActive();
         Long getTaps();
         Long getClicks();
+    }
+
+    interface HeatmapRow {
+        Integer getDow();  // 0=월…6=일
+        Integer getHr();   // 0~23 KST
+        Long getCnt();
     }
 }
