@@ -5,10 +5,11 @@ spring:
     name: nfcreview
 
   # (1부) DB 연결. ${이름:기본값} → 환경변수가 있으면 그 값, 없으면 기본값(로컬 개발용)
+  # 읽는 순서: DB_URL 등(직접 넣은 값) → Railway MySQL이 주는 MYSQLHOST 등 → 로컬 기본값
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3307/nfcreview?serverTimezone=UTC}
-    username: ${DB_USERNAME:nfcreview}
-    password: ${DB_PASSWORD:localpass}
+    url: ${DB_URL:jdbc:mysql://${MYSQLHOST:localhost}:${MYSQLPORT:3307}/${MYSQLDATABASE:nfcreview}?serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:${MYSQLUSER:nfcreview}}
+    password: ${DB_PASSWORD:${MYSQLPASSWORD:localpass}}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-timeout: 3000
@@ -34,10 +35,7 @@ app:
   base-url: ${APP_BASE_URL:http://localhost:8080} # NFC 카드에 쓸 주소의 앞부분
   admin:
     username: ${ADMIN_USERNAME:dohun}
-    password: ${ADMIN_PASSWORD:0000} # 로컬 전용 기본값. 운영에선 반드시 환경변수로
-
-server:
-  port: ${PORT:8080} # Railway는 PORT 환경변수를 주입해요. 로컬에선 8080 기본값 사용
+    password: ${ADMIN_PASSWORD:00000000} # 로컬 전용 기본값(AppProperties 규칙상 8자 이상). 운영에선 반드시 환경변수로
 
 # (9부) 밖으로 여는 관리용 주소는 /actuator/health 하나만
 management:
